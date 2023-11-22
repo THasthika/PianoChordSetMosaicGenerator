@@ -190,7 +190,7 @@ class ChordDiagram:
         return new_img
 
 
-def make_chord_mosaic(chords: list[str], out_file="out.png", chords_per_row=3, chord_width=400, chord_height=200):
+def make_chord_mosaic(chords: list[str],  chords_per_row=3, chord_width=400, chord_height=200) -> Image.Image:
 
     assert len(chords) > 0
     assert chords_per_row > 0
@@ -224,40 +224,52 @@ def make_chord_mosaic(chords: list[str], out_file="out.png", chords_per_row=3, c
 
         c_idx += 1
 
-    mosaic_image.save(out_file)
+    return mosaic_image
 
+
+def make_chord_mosaic_set(chord_sets: list[list[str]], chords_per_row=3, chord_width=400, chord_height=200):
+
+    chord_set_images: list[tuple[Image.Image, int]] = []
+
+    total_height = 0
+
+    for chord_set in chord_sets:
+        chord_set_image = make_chord_mosaic(chord_set, chords_per_row=chords_per_row,
+                                            chord_width=chord_width, chord_height=chord_height)
+        chord_set_images.append((chord_set_image, chord_set_image.size[1]))
+        total_height += chord_set_image.size[1]
+
+    assert total_height > 0
+    assert len(chord_set_images) > 0
+
+    out_image = Image.new(
+        "RGB", (chord_set_images[0][0].size[0], total_height))
+
+    y_offset = 0
+    for img in chord_set_images:
+        out_image.paste(img[0], (0, y_offset))
+        y_offset += img[1]
+
+    return out_image
+
+
+def save_mosaic(image: Image.Image, out_file="out.png"):
+    image.save(out_file)
 
 # make_chord_mosaic(["C", "D", "Ddim"])
 
 
-# DbM7 Db7 Ebm7 Ebdim Bdim Ebm7 Adim
-# DbM7 Db7 GbM7 B7 Fm7 Bb7 Ebm7 Ab7
-# DbM7 Db7 GbM7 B7 Fm7 Bb7 Ebm7 Ab7
-# DbM7 Abm7 Db7 Gm7 B7 Fm7 Bb7 Eb7 Ab7
-# Bbm F7 AbM7 Dbm F7 AbM7 Eb7 F7 AbM7 Gdim F7 AbM7
-# F#M7 Fm7 F#M7 F# Fm7 Eb7 F7 AbM7 Eb7 F7 AbM7 AbM7 F7 AbM7
-
-
-# chords_list = [
-#     "DbM7", "Db7", "Ebm7", "Ebdim", "Bdim", "Adim", "GbM7", "B7", "Fm7",
-#     "Bb7", "Ab7", "Abm7", "Gm7", "Eb7", "Bbm", "F7", "AbM7", "Dbm", "Gdim",
-#     "AbM7", "F#M7", "F#"
-# ]
-
-
 # make_chord_mosaic(sorted(chords_list), chords_per_row=3)
 
+# cc = [
+#     ["DbM7", "Db7", "Ebm7", "Ebdim", "Fm7", "Bdim", "Ebm7", "Adim"],
+#     ["DbM7", "Db7", "GbM7", "B7", "Fm7", "Bb7", "Ebm7", "Ab7"],
+#     ["DbM7", "Db7", "GbM7", "B7", "Fm7", "Bb7", "Ebm7", "Ab7"],
+#     ["DbM7", "Abm7", "Db7", "Gm7", "B7", "Fm7", "Bb7", "Eb7", "Ab7"],
+#     ["Bbm", "F7", "AbM7", "Dbm", "F7", "AbM7",
+#         "Eb7", "F7", "AbM7", "Gdim", "F7", "AbM7"],
+#     ["F#M7", "Fm7", "F#M7", "F#", "Fm7", "Eb7", "F7",
+#         "AbM7", "Eb7", "F7", "AbM7", "AbM7", "F7", "AbM7"]
+# ]
 
-cc = [
-    ["DbM7", "Db7", "Ebm7", "Ebdim", "Bdim", "Ebm7", "Adim"],
-    ["DbM7", "Db7", "GbM7", "B7", "Fm7", "Bb7", "Ebm7", "Ab7"],
-    ["DbM7", "Db7", "GbM7", "B7", "Fm7", "Bb7", "Ebm7", "Ab7"],
-    ["DbM7", "Abm7", "Db7", "Gm7", "B7", "Fm7", "Bb7", "Eb7", "Ab7"],
-    ["Bbm", "F7", "AbM7", "Dbm", "F7", "AbM7",
-        "Eb7", "F7", "AbM7", "Gdim", "F7", "AbM7"],
-    ["F#M7", "Fm7", "F#M7", "F#", "Fm7", "Eb7", "F7",
-        "AbM7", "Eb7", "F7", "AbM7", "AbM7", "F7", "AbM7"]
-]
-
-for (idx, cl) in enumerate(cc):
-    make_chord_mosaic(cl, out_file="{}.png".format(idx), chords_per_row=5)
+# save_mosaic(make_chord_mosaic_set(cc, chords_per_row=5), out_file="loose.png")
