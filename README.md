@@ -1,6 +1,6 @@
 # Piano Chord Set Downloader
 
-This tool can be used to generate image diagrams of piano chords so that it can be played easily for beinners.
+This tool can be used to generate image diagrams of piano chords so that it can be played easily for beginners.
 
 ## Python Version
 - Requires 3.11+
